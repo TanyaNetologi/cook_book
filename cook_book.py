@@ -1,315 +1,227 @@
-import os
-from typing import Dict, List
+def chitat_file(imya_faila):
+    try:
+        file = open(imya_faila, "r", encoding="utf-8")
+        stroki = file.readlines()
+        file.close()
+        chistye_stroki = []
+        for s in stroki:
+            s = s.strip()
+            if s != "":
+                chistye_stroki.append(s)
+        return chistye_stroki
+    except:
+        print("Не могу открыть файл!")
+        return []
 
 
-def parse_recipe_file(filepath: str) -> Dict[str, List[Dict[str, any]]]:
-   
+def sozdat_cook_book(stroki):
     cook_book = {}
-
-    if not os.path.exists(filepath):
-        raise FileNotFoundError(f"Файл {filepath} не найден")
-
-    with open(filepath, "r", encoding="utf-8") as file:
-        lines = [line.strip() for line in file if line.strip()]
-
     i = 0
-    while i < len(lines):
-        dish_name = lines[i]
-        i += 1
 
-        if i >= len(lines):
+    while i < len(stroki):
+        nazvanie = stroki[i]
+        i = i + 1
+        if i >= len(stroki):
             break
+        kol_vo = int(stroki[i])
+        i = i + 1
+        ingredienti = []
+        for j in range(kol_vo):
+            if i >= len(stroki):
+                break
 
-        try:
-            ingredient_count = int(lines[i])
-        except ValueError:
-            raise ValueError(
-                f"Ошибка в формате файла: ожидалось число ингредиентов, получено '{lines[i]}'"
-            )
-        i += 1
-        ingredients = []
-        for _ in range(ingredient_count):
-            if i >= len(lines):
-                raise ValueError(
-                    f"Ошибка: недостаточно ингредиентов для блюда '{dish_name}'"
-                )
+            stroka = stroki[i]
+            chast = stroka.split("|")
 
-            ingredient_line = lines[i]
-            parts = [part.strip() for part in ingredient_line.split("|")]
+            nazv_ing = chast[0].strip()
+            kol = chast[1].strip()
+            edinica = chast[2].strip()
 
-            if len(parts) != 3:
-                raise ValueError(f"Ошибка в формате ингредиента: '{ingredient_line}'")
+            if "." in kol:
+                kol = float(kol)
+            else:
+                kol = int(kol)
 
-            ingredient_name, quantity_str, measure = parts
+            ing = {"ingredient_name": nazv_ing, "quantity": kol, "measure": edinica}
+            ingredienti.append(ing)
+            i = i + 1
 
-            try:
-                if "." in quantity_str:
-                    quantity = float(quantity_str)
-                else:
-                    quantity = int(quantity_str)
-            except ValueError:
-                quantity = (
-                    quantity_str  
-                )
-
-            ingredient_dict = {
-                "ingredient_name": ingredient_name,
-                "quantity": quantity,
-                "measure": measure,
-            }
-            ingredients.append(ingredient_dict)
-            i += 1
-
-        cook_book[dish_name] = ingredients
+        cook_book[nazvanie] = ingredienti
 
     return cook_book
 
 
-def display_recipes(cook_book: Dict[str, List[Dict[str, any]]]) -> None:
-    
-    if not cook_book:
-        print("Список рецептов пуст.")
+def pokazat_vse_recepty(cook_book):
+    if len(cook_book) == 0:
+        print("Нет рецептов!")
         return
 
-    print("\n" + "=" * 50)
-    print("КУЛИНАРНАЯ КНИГА")
-    print("=" * 50)
+    print("\n" + "=" * 40)
+    print("ВСЕ РЕЦЕПТЫ")
+    print("=" * 40)
 
-    for dish_name, ingredients in cook_book.items():
-        print(f"\n📖 {dish_name}")
-        print("-" * 30)
-        print(f"Количество ингредиентов: {len(ingredients)}")
-        print("\nИнгредиенты:")
-        for ingredient in ingredients:
-            print(
-                f"  • {ingredient['ingredient_name']}: "
-                f"{ingredient['quantity']} {ingredient['measure']}"
-            )
-        print()
+    for nazvanie in cook_book:
+        print("\nБлюдо:", nazvanie)
+        print("-" * 20)
+
+        ingredienti = cook_book[nazvanie]
+        print("Ингредиенты:")
+        for ing in ingredienti:
+            print(f"  - {ing['ingredient_name']}: {ing['quantity']} {ing['measure']}")
 
 
-def display_cookbook_structure(cook_book: Dict[str, List[Dict[str, any]]]) -> None:
-    
-    print("\n" + "=" * 50)
-    print("СТРУКТУРА СЛОВАРЯ COOK_BOOK:")
-    print("=" * 50)
-    print("cook_book = {")
-
-    for dish_name, ingredients in cook_book.items():
-        print(f'    "{dish_name}": [')
-        for ingredient in ingredients:
-            print(
-                f'        {{"ingredient_name": "{ingredient["ingredient_name"]}", '
-                f'"quantity": {ingredient["quantity"]},'
-                f'"measure": "{ingredient["measure"]}"}},'
-            )
-        print("    ],")
-
-    print("}")
-
-
-def search_recipe(cook_book: Dict[str, List[Dict[str, any]]], search_term: str) -> None:
-    
-    search_term_lower = search_term.lower()
-    found_recipes = {}
-
-    for dish_name, ingredients in cook_book.items():
-        if search_term_lower in dish_name.lower():
-            found_recipes[dish_name] = ingredients
-
-    if found_recipes:
-        print(f"\n🔍 Найдено рецептов по запросу '{search_term}': {len(found_recipes)}")
-        display_recipes(found_recipes)
-    else:
-        print(f"\n❌ Рецепты по запросу '{search_term}' не найдены.")
-
-
-def get_recipe_ingredients(
-    cook_book: Dict[str, List[Dict[str, any]]], dish_name: str
-) -> None:
-    
-    dish_name_lower = dish_name.lower()
-
-    for name, ingredients in cook_book.items():
-        if name.lower() == dish_name_lower:
-            print(f"\n📖 Рецепт: {name}")
-            print("-" * 30)
-            print("Ингредиенты:")
-            for ingredient in ingredients:
-                print(
-                    f"  • {ingredient['ingredient_name']}: "
-                    f"{ingredient['quantity']} {ingredient['measure']}"
-                )
-            return
-
-    matching_recipes = [
-        name for name in cook_book.keys() if dish_name_lower in name.lower()
-    ]
-
-    if matching_recipes:
-        print(f"\n🔍 Блюдо '{dish_name}' точно не найдено. Возможно, вы имели в виду:")
-        for recipe in matching_recipes:
-            print(f"  • {recipe}")
-        print("\nВведите точное название блюда для просмотра ингредиентов.")
-    else:
-        print(f"\n❌ Блюдо '{dish_name}' не найдено в кулинарной книге.")
-
-
-def list_all_dishes(cook_book: Dict[str, List[Dict[str, any]]]) -> None:
-    
-    if not cook_book:
-        print("Список рецептов пуст.")
+def pokazat_spisok_blud(cook_book):
+    if len(cook_book) == 0:
+        print("Нет рецептов!")
         return
 
-    print("\n📋 СПИСОК ВСЕХ БЛЮД:")
+    print("\nСПИСОК БЛЮД:")
     print("-" * 30)
-    for i, dish_name in enumerate(cook_book.keys(), 1):
-        ingredient_count = len(cook_book[dish_name])
-        print(f"{i:2d}. {dish_name} ({ingredient_count} ингр.)")
+
+    nomer = 1
+    for nazvanie in cook_book:
+        kol_ing = len(cook_book[nazvanie])
+        print(f"{nomer}. {nazvanie} ({kol_ing} ингр.)")
+        nomer = nomer + 1
 
 
-def get_shop_list_by_dishes(
-    dishes: List[str],
-    person_count: int,
-    cook_book: Dict[str, List[Dict[str, Union[str, int, float]]]],
-) -> Dict[str, Dict[str, Union[str, int, float]]]:
-    
-    shop_list = {}
+def poisk_recepta(cook_book):
+    zapros = input("Введите название блюда: ")
+    zapros = zapros.lower()
 
-    for dish in dishes:
-        if dish not in cook_book:
-            print(
-                f"⚠️ Предупреждение: Блюдо '{dish}' не найдено в кулинарной книге и будет пропущено."
-            )
-            continue
+    naideno = False
+    for nazvanie in cook_book:
+        if zapros in nazvanie.lower():
+            print(f"\nНайден рецепт: {nazvanie}")
+            print("-" * 20)
+            ingredienti = cook_book[nazvanie]
+            for ing in ingredienti:
+                print(
+                    f"  - {ing['ingredient_name']}: {ing['quantity']} {ing['measure']}"
+                )
+            naideno = True
 
-        ingredients = cook_book[dish]
+    if not naideno:
+        print(f"Блюдо '{zapros}' не найдено!")
 
-        for ingredient in ingredients:
-            ingredient_name = ingredient["ingredient_name"]
-            quantity = ingredient["quantity"] * person_count
-            measure = ingredient["measure"]
 
-            if ingredient_name in shop_list:
-                shop_list[ingredient_name]["quantity"] += quantity
+def pokazat_ingredienty_bluda(cook_book):
+    nazvanie = input("Введите название блюда: ")
+
+    if nazvanie in cook_book:
+        print(f"\nРецепт: {nazvanie}")
+        print("-" * 20)
+        ingredienti = cook_book[nazvanie]
+        for ing in ingredienti:
+            print(f"  - {ing['ingredient_name']}: {ing['quantity']} {ing['measure']}")
+    else:
+        print(f"Блюдо '{nazvanie}' не найдено!")
+
+
+def pokazat_slovar(cook_book):
+    print("\n" + "=" * 50)
+    print("СЛОВАРЬ COOK_BOOK:")
+    print("=" * 50)
+    print(cook_book)
+
+
+def sdelat_spisok_pokupok(cook_book):
+    vvod = input("Введите названия блюд через запятую: ")
+    bluda = vvod.split(",")
+
+    # Убираем лишние пробелы
+    bluda_chistye = []
+    for b in bluda:
+        bluda_chistye.append(b.strip())
+
+    kol_person = int(input("Введите количество персон: "))
+
+    spisok = {}
+
+    for bludo in bluda_chistye:
+        if bludo in cook_book:
+            ingredienti = cook_book[bludo]
+            for ing in ingredienti:
+                nazv = ing["ingredient_name"]
+                kol = ing["quantity"] * kol_person
+                ed = ing["measure"]
+
+                if nazv in spisok:
+                    spisok[nazv]["quantity"] = spisok[nazv]["quantity"] + kol
+                else:
+                    spisok[nazv] = {"measure": ed, "quantity": kol}
+        else:
+            print(f"Предупреждение: блюдо '{bludo}' не найдено!")
+
+    if len(spisok) > 0:
+        print("\n" + "=" * 50)
+        print("СПИСОК ПОКУПОК:")
+        print("=" * 50)
+        print("{")
+
+        vse_ing = list(spisok.items())
+        for i in range(len(vse_ing)):
+            ing, detal = vse_ing[i]
+            if i < len(vse_ing) - 1:
+                print(
+                    f'    "{ing}": {{"measure": "{detal["measure"]}", "quantity": {detal["quantity"]}}},'
+                )
             else:
-                shop_list[ingredient_name] = {"measure": measure, "quantity": quantity}
+                print(
+                    f'    "{ing}": {{"measure": "{detal["measure"]}", "quantity": {detal["quantity"]}}}'
+                )
 
-    return shop_list
-
-
-def display_shop_list(shop_list: Dict[str, Dict[str, Union[str, int, float]]]) -> None:
-    
-    if not shop_list:
-        print("Список покупок пуст.")
-        return
-
-    print("\n" + "=" * 50)
-    print("СПИСОК ПОКУПОК")
-    print("=" * 50)
-
-    print("{")
-    for ingredient, details in shop_list.items():
-        print(
-            f'    "{ingredient}": {{"measure": "{details["measure"]}", "quantity": {details["quantity"]}}},'
-        )
-    print("}")
-    print("=" * 50)
-
-def main_example():
-
-    cook_book = {
-        "Омлет": [
-            {"ingredient_name": "Яйцо", "quantity": 2, "measure": "шт"},
-            {"ingredient_name": "Молоко", "quantity": 100, "measure": "мл"},
-            {"ingredient_name": "Помидор", "quantity": 2, "measure": "шт"},
-        ],
-        "Запеченный картофель": [
-            {"ingredient_name": "Картофель", "quantity": 1, "measure": "кг"},
-            {"ingredient_name": "Чеснок", "quantity": 3, "measure": "зуб"},
-            {"ingredient_name": "Сыр гуада", "quantity": 100, "measure": "г"},
-        ],
-    }
-
-    dishes = ["Запеченный картофель", "Омлет"]
-    person_count = 2
-
-    shop_list = get_shop_list_by_dishes(dishes, person_count, cook_book)
-
-    print(f"\n📝 Список покупок для блюд: {dishes}")
-    print(f"👥 Количество персон: {person_count}")
-    display_shop_list(shop_list)
-
-    print("\n" + "=" * 50)
-    print("СЛОВАРЬ В ФОРМАТЕ ЗАДАНИЯ:")
-    print("=" * 50)
-    print(shop_list)
-
-
-if __name__ == "__main__":
-    main_example()
+        print("}")
+        print("=" * 50)
+    else:
+        print("Список покупок пуст!")
 
 
 def main():
-    filepath = "recipes.txt"
-    try:
-        cook_book = parse_recipe_file(filepath)
-        print(f"✅ Успешно загружено {len(cook_book)} рецептов из файла '{filepath}'")
+    imya_faila = "recipes.txt"
 
-        display_cookbook_structure(cook_book)
+    print("ЗАГРУЗКА КУЛИНАРНОЙ КНИГИ...")
+    stroki = chitat_file(imya_faila)
 
-        while True:
-            print("\n" + "=" * 40)
-            print("КУЛИНАРНАЯ КНИГА - МЕНЮ")
-            print("=" * 40)
-            print("1. Показать все рецепты")
-            print("2. Показать список блюд")
-            print("3. Поиск рецепта по названию")
-            print("4. Показать ингредиенты блюда")
-            print("5. Показать структуру словаря cook_book")
-            print("6. Сформировать список покупок")
-            print("7. Выход")
-            print("-" * 40)
+    if len(stroki) == 0:
+        print("Не удалось загрузить рецепты!")
+        return
 
-            choice = input("Выберите действие (1-6): ").strip()
+    cook_book = sozdat_cook_book(stroki)
+    print(f"Загружено {len(cook_book)} рецептов!")
 
-            if choice == "1":
-                display_recipes(cook_book)
-            elif choice == "2":
-                list_all_dishes(cook_book)
-            elif choice == "3":
-                search_term = input("Введите название блюда для поиска: ").strip()
-                if search_term:
-                    search_recipe(cook_book, search_term)
-                else:
-                    print("❌ Поисковый запрос не может быть пустым.")
-            elif choice == "4":
-                dish_name = input("Введите название блюда: ").strip()
-                if dish_name:
-                    get_recipe_ingredients(cook_book, dish_name)
-                else:
-                    print("❌ Название блюда не может быть пустым.")
-            elif choice == "5":
-                display_cookbook_structure(cook_book)
-            elif choice == "6":
-                dishes_input = input("Введите названия блюд через запятую: ").strip()
-                dishes = [dish.strip() for dish in dishes_input.split(",")]
-                person_count = int(input("Введите количество персон: "))
-                shop_list = get_shop_list_by_dishes(dishes, person_count, cook_book)
-                display_shop_list(shop_list)
-            elif choice == "7":
-                print("👋 До свидания!")
-                break
-            else:
-                print("❌ Неверный выбор. Пожалуйста, выберите 1-6.")
+    while True:
+        print("\n" + "=" * 40)
+        print("КУЛИНАРНАЯ КНИГА")
+        print("=" * 40)
+        print("1. Все рецепты")
+        print("2. Список блюд")
+        print("3. Поиск рецепта")
+        print("4. Ингредиенты блюда")
+        print("5. Показать словарь cook_book")
+        print("6. Список покупок")
+        print("7. Выход")
+        print("-" * 40)
 
-    except FileNotFoundError as e:
-        print(f"❌ Ошибка: {e}")
-        print(f"Создайте файл '{filepath}' в той же папке, что и программа.")
-    except ValueError as e:
-        print(f"❌ Ошибка при чтении файла: {e}")
-    except Exception as e:
-        print(f"❌ Непредвиденная ошибка: {e}")
+        vibor = input("Выберите действие (1-7): ")
+
+        if vibor == "1":
+            pokazat_vse_recepty(cook_book)
+        elif vibor == "2":
+            pokazat_spisok_blud(cook_book)
+        elif vibor == "3":
+            poisk_recepta(cook_book)
+        elif vibor == "4":
+            pokazat_ingredienty_bluda(cook_book)
+        elif vibor == "5":
+            pokazat_slovar(cook_book)
+        elif vibor == "6":
+            sdelat_spisok_pokupok(cook_book)
+        elif vibor == "7":
+            print("До свидания!")
+            break
+        else:
+            print("Неверный выбор! Введите 1-7")
 
 
 if __name__ == "__main__":
