@@ -1,29 +1,59 @@
-import os
-def count_lines_in_file(file_path):
-    """Подсчитывает количество строк в файле."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        return sum(1 for line in f)
+имена_файлов = ["1.txt", "2.txt", "3.txt"]
 
-def merge_files(file_names, output_file_name):
-    
-    files_info = []
-    for file_name in file_names:
-        line_count = count_lines_in_file(file_name)
-        files_info.append((file_name, line_count))
+результат = "result.txt"
 
-    files_info.sort(key=lambda x: x[1])
+информация_о_файлах = []
 
-    with open(output_file_name, "w", encoding="utf-8") as output_file:
-        for file_name, line_count in files_info:
-            output_file.write(f"{file_name}\n")
-            output_file.write(f"{line_count}\n")
-            with open(file_name, "r", encoding="utf-8") as input_file:
-                for line in input_file:
-                    output_file.write(line)
+for имя in имена_файлов:
+    файл = open(имя, "r", encoding="utf-8")
 
-if __name__ == "__main__":
-    files = ["1.txt", "2.txt", "3.txt"]
-    output_file = "result.txt"
+    количество_строк = 0
+    for строка in файл:
+        количество_строк = количество_строк + 1
 
-    merge_files(files, output_file)
-    print(f"Файлы объединены в {output_file}")
+    файл.close()
+
+    информация_о_файлах.append([имя, количество_строк])
+
+    print(f"Файл {имя} содержит {количество_строк} строк(и)")
+
+print("\n--- Начинаем сортировку ---\n")
+
+for i in range(len(информация_о_файлах)):
+    for j in range(len(информация_о_файлах) - 1 - i):
+        if информация_о_файлах[j][1] > информация_о_файлах[j + 1][1]:
+            временное_хранение = информация_о_файлах[j]
+            информация_о_файлах[j] = информация_о_файлах[j + 1]
+            информация_о_файлах[j + 1] = временное_хранение
+
+print("Файлы после сортировки (по возрастанию количества строк):")
+for имя, кол_во in информация_о_файлах:
+    print(f"  {имя} - {кол_во} строк(и)")
+print()
+
+
+выходной_файл = open(результат, "w", encoding="utf-8")
+
+for имя_файла, количество_строк in информация_о_файлах:
+    выходной_файл.write(имя_файла + "\n")
+
+    выходной_файл.write(str(количество_строк) + "\n")
+
+    исходный_файл = open(имя_файла, "r", encoding="utf-8")
+
+    for строка in исходный_файл:
+        выходной_файл.write(строка)
+
+    исходный_файл.close()
+
+    print(f"Файл {имя_файла} добавлен в результат")
+
+выходной_файл.close()
+
+print(f"\nГотово! Все файлы объединены в {результат}")
+
+print("\n--- Содержимое итогового файла ---")
+файл_результат = open(результат, "r", encoding="utf-8")
+for строка in файл_результат:
+    print(строка, end="")
+файл_результат.close()
