@@ -1,59 +1,79 @@
-имена_файлов = ["1.txt", "2.txt", "3.txt"]
+imena_faylov = ["1.txt", "2.txt", "3.txt"]
 
-результат = "result.txt"
+rezultat = "result.txt"
 
-информация_о_файлах = []
-
-for имя in имена_файлов:
-    файл = open(имя, "r", encoding="utf-8")
-
-    количество_строк = 0
-    for строка in файл:
-        количество_строк = количество_строк + 1
-
-    файл.close()
-
-    информация_о_файлах.append([имя, количество_строк])
-
-    print(f"Файл {имя} содержит {количество_строк} строк(и)")
-
-print("\n--- Начинаем сортировку ---\n")
-
-for i in range(len(информация_о_файлах)):
-    for j in range(len(информация_о_файлах) - 1 - i):
-        if информация_о_файлах[j][1] > информация_о_файлах[j + 1][1]:
-            временное_хранение = информация_о_файлах[j]
-            информация_о_файлах[j] = информация_о_файлах[j + 1]
-            информация_о_файлах[j + 1] = временное_хранение
-
-print("Файлы после сортировки (по возрастанию количества строк):")
-for имя, кол_во in информация_о_файлах:
-    print(f"  {имя} - {кол_во} строк(и)")
+print("=== НАЧИНАЕМ ОБЪЕДИНЕНИЕ ФАЙЛОВ ===")
+print(f"Найдено файлов: {len(imena_faylov)}")
+print(f"Список файлов: {imena_faylov}")
 print()
 
+info_o_faylah = []
 
-выходной_файл = open(результат, "w", encoding="utf-8")
+for imya in imena_faylov:
+    try:
+        fayl = open(imya, "r", encoding="utf-8")
 
-for имя_файла, количество_строк in информация_о_файлах:
-    выходной_файл.write(имя_файла + "\n")
+        kolichestvo_strok = 0
+        for stroka in fayl:
+            kolichestvo_strok = kolichestvo_strok + 1
 
-    выходной_файл.write(str(количество_строк) + "\n")
+        fayl.close()
+        info_o_faylah.append([imya, kolichestvo_strok])
+        print(f"✓ Файл {imya} содержит {kolichestvo_strok} строк(и)")
 
-    исходный_файл = open(имя_файла, "r", encoding="utf-8")
+    except FileNotFoundError:
+        print(f"✗ ОШИБКА: Файл {imya} не найден!")
+        print(f"  Убедитесь, что файл {imya} находится в той же папке.")
 
-    for строка in исходный_файл:
-        выходной_файл.write(строка)
+print()
+print(f"Обработано файлов: {len(info_o_faylah)}")
+print()
 
-    исходный_файл.close()
+for i in range(len(info_o_faylah)):
+    for j in range(len(info_o_faylah) - 1 - i):
+        if info_o_faylah[j][1] > info_o_faylah[j + 1][1]:
+            vrem_hranenie = info_o_faylah[j]
+            info_o_faylah[j] = info_o_faylah[j + 1]
+            info_o_faylah[j + 1] = vrem_hranenie
 
-    print(f"Файл {имя_файла} добавлен в результат")
+print("Файлы после сортировки (от меньшего к большему):")
+for imya, kolvo in info_o_faylah:
+    print(f"  {imya} - {kolvo} строк(и)")
+print()
 
-выходной_файл.close()
+vihodnoi_fayl = open(rezultat, "w", encoding="utf-8")
+zapicano_faylov = 0
 
-print(f"\nГотово! Все файлы объединены в {результат}")
+for imya_fayla, kolichestvo_strok in info_o_faylah:
+    vihodnoi_fayl.write(imya_fayla + "\n")
+    vihodnoi_fayl.write(str(kolichestvo_strok) + "\n")
+    ishodnii_fayl = open(imya_fayla, "r", encoding="utf-8")
 
-print("\n--- Содержимое итогового файла ---")
-файл_результат = open(результат, "r", encoding="utf-8")
-for строка in файл_результат:
-    print(строка, end="")
-файл_результат.close()
+    for stroka in ishodnii_fayl:
+        vihodnoi_fayl.write(stroka)
+
+    ishodnii_fayl.close()
+
+    zapicano_faylov = zapicano_faylov + 1
+    print(
+        f"✓ Файл {imya_fayla} добавлен в результат "
+        f"(записано {zapicano_faylov} из {len(info_o_faylah)})"
+    )
+vihodnoi_fayl.close()
+
+print()
+print("=== ГОТОВО! ===")
+print(f"Все {zapicano_faylov} файлов объединены в {rezultat}")
+
+print()
+print("--- СОДЕРЖИМОЕ ИТОГОВОГО ФАЙЛА ---")
+
+try:
+    fayl_rezultat = open(rezultat, "r", encoding="utf-8")
+    nomer_stroki = 1
+    for stroka in fayl_rezultat:
+        print(f"{nomer_stroki:2}. {stroka}", end="")
+        nomer_stroki = nomer_stroki + 1
+    fayl_rezultat.close()
+except FileNotFoundError:
+    print(f"Файл {rezultat} не создан, возможно произошла ошибка.")
