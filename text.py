@@ -1,79 +1,79 @@
-imena_faylov = ["1.txt", "2.txt", "3.txt"]
+file_names = ["1.txt", "2.txt", "3.txt"]
 
-rezultat = "result.txt"
+output_file = "result.txt"
 
 print("=== НАЧИНАЕМ ОБЪЕДИНЕНИЕ ФАЙЛОВ ===")
-print(f"Найдено файлов: {len(imena_faylov)}")
-print(f"Список файлов: {imena_faylov}")
+print(f"Найдено файлов: {len(file_names)}")
+print(f"Список файлов: {file_names}")
 print()
 
-info_o_faylah = []
+files_info = []
 
-for imya in imena_faylov:
+for name in file_names:
     try:
-        fayl = open(imya, "r", encoding="utf-8")
+        file = open(name, "r", encoding="utf-8")
 
-        kolichestvo_strok = 0
-        for stroka in fayl:
-            kolichestvo_strok = kolichestvo_strok + 1
+        line_count = 0
+        for line in file:
+            line_count = line_count + 1
 
-        fayl.close()
-        info_o_faylah.append([imya, kolichestvo_strok])
-        print(f"✓ Файл {imya} содержит {kolichestvo_strok} строк(и)")
+        file.close()
+        files_info.append([name, line_count])
+        print(f"✓ Файл {name} содержит {line_count} строк(и)")
 
     except FileNotFoundError:
-        print(f"✗ ОШИБКА: Файл {imya} не найден!")
-        print(f"  Убедитесь, что файл {imya} находится в той же папке.")
+        print(f"✗ ОШИБКА: Файл {name} не найден!")
+        print(f"  Убедитесь, что файл {name} находится в той же папке.")
 
 print()
-print(f"Обработано файлов: {len(info_o_faylah)}")
+print(f"Обработано файлов: {len(files_info)}")
 print()
 
-for i in range(len(info_o_faylah)):
-    for j in range(len(info_o_faylah) - 1 - i):
-        if info_o_faylah[j][1] > info_o_faylah[j + 1][1]:
-            vrem_hranenie = info_o_faylah[j]
-            info_o_faylah[j] = info_o_faylah[j + 1]
-            info_o_faylah[j + 1] = vrem_hranenie
+for i in range(len(files_info)):
+    for j in range(len(files_info) - 1 - i):
+        if files_info[j][1] > files_info[j + 1][1]:
+            temp = files_info[j]
+            files_info[j] = files_info[j + 1]
+            files_info[j + 1] = temp
 
 print("Файлы после сортировки (от меньшего к большему):")
-for imya, kolvo in info_o_faylah:
-    print(f"  {imya} - {kolvo} строк(и)")
+for name, count in files_info:
+    print(f"  {name} - {count} строк(и)")
 print()
 
-vihodnoi_fayl = open(rezultat, "w", encoding="utf-8")
-zapicano_faylov = 0
+output = open(output_file, "w", encoding="utf-8")
+written_count = 0
 
-for imya_fayla, kolichestvo_strok in info_o_faylah:
-    vihodnoi_fayl.write(imya_fayla + "\n")
-    vihodnoi_fayl.write(str(kolichestvo_strok) + "\n")
-    ishodnii_fayl = open(imya_fayla, "r", encoding="utf-8")
+for name, count in files_info:
+    output.write(name + "\n")
+    output.write(str(count) + "\n")
+    input_file = open(name, "r", encoding="utf-8")
 
-    for stroka in ishodnii_fayl:
-        vihodnoi_fayl.write(stroka)
+    for line in input_file:
+        output.write(line)
 
-    ishodnii_fayl.close()
+    input_file.close()
 
-    zapicano_faylov = zapicano_faylov + 1
+    written_count = written_count + 1
     print(
-        f"✓ Файл {imya_fayla} добавлен в результат "
-        f"(записано {zapicano_faylov} из {len(info_o_faylah)})"
+        f"✓ Файл {name} добавлен в результат "
+        f"(записано {written_count} из {len(files_info)})"
     )
-vihodnoi_fayl.close()
+output.close()
 
 print()
 print("=== ГОТОВО! ===")
-print(f"Все {zapicano_faylov} файлов объединены в {rezultat}")
+print(f"Все {written_count} файлов объединены в {output_file}")
 
 print()
 print("--- СОДЕРЖИМОЕ ИТОГОВОГО ФАЙЛА ---")
 
 try:
-    fayl_rezultat = open(rezultat, "r", encoding="utf-8")
-    nomer_stroki = 1
-    for stroka in fayl_rezultat:
-        print(f"{nomer_stroki:2}. {stroka}", end="")
-        nomer_stroki = nomer_stroki + 1
-    fayl_rezultat.close()
+    rezult_file = open(output_file, "r", encoding="utf-8")
+    line_number = 1
+    for line in rezult_file:
+        print(f"{line_number:2}. {line}", end="")
+        line_number = line_number + 1
+    rezult_file.close()
 except FileNotFoundError:
-    print(f"Файл {rezultat} не создан, возможно произошла ошибка.")
+    print(f"Файл {output_file} не создан, возможно произошла ошибка.")
